@@ -1,0 +1,23 @@
+
+`include "uvm_macros.svh"
+import uvm_pkg::*;
+ 
+module tb;
+ 
+int verbosity = 0;
+  
+initial begin
+  /////////////////////access value of verbosity
+   //verbosity = uvm_top.get_report_verbosity_level();
+   //$display("Default Verbosity Level : %0d", verbosity);
+  
+  ////////////////////////override default verbosity
+   uvm_top.set_report_verbosity_level(UVM_HIGH);
+  
+  `uvm_info("TB_TOP", "This is Informative message", UVM_HIGH)
+  
+end
+ 
+ 
+ 
+endmodule
