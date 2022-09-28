@@ -15,7 +15,7 @@ class temp extends uvm_object;
  
   virtual function void do_print(uvm_printer printer);
   super.do_print(printer);
-  printer.print_field("data_temp", data_temp, $bits(data_temp), UVM_DEC);
+  printer.print_field("data_temp", data_temp, $bits(data_temp), UVM_DEC); // to print the value of data we need to call print field.
   endfunction
     
 endclass
