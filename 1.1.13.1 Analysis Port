@@ -1,0 +1,242 @@
+// -------------------- TLM analysis port  -----------------------
+
+// transmit a data from a single class to multiple classes 
+// one to many kind of scenario
+// blocking port one to one commnication
+// transction class
+
+
+`include "uvm_macros.svh"											// will give an access to uvm macros
+ import uvm_pkg::*;													// will give an access to uvm pkg
+
+
+
+//---------------- transaction clsss -------------------
+
+
+class transaction extends uvm_sequence_item;
+
+	rand bit[3:0] a;												// class properties daclared as rand
+	rand bit[4:0] b;
+
+	`uvm_object_utils_begin(transaction)							// factory registration and field macros
+		`uvm_field_int(a, UVM_DEFAULT | UVM_DEC)					// UVM_DEFAULT or UVM_ALL_ON flag
+		`uvm_field_int(b, UVM_DEFAULT | UVM_DEC)					// | or + UVM_DEC decimal format flag
+	`uvm_object_utils_end
+
+
+	function new(input string name = "transaction");				// object calss in UBCH hence one argument
+		super.new(name);
+	endfunction: new
+
+endclass: transaction
+
+
+
+// ------------------- producer/initiator class  ----------------------
+
+
+
+class producer extends uvm_component;
+  
+   	transaction trans;											// instance for transaction class 
+
+	`uvm_component_utils(producer)								// factory regestration
+
+	uvm_analysis_port #(transaction) ap;						// producer will have analyis port #(transaction) i.e parameter
+
+
+	function new(input string name = "producer", uvm_component parent);// constructor two arguments
+		super.new(name,parent);
+		ap = new("WRITE",this);									// creating object for send
+	endfunction: new 
+
+
+// build_phase:- responsible for building all lower level component
+//		 executes in top down manner.
+
+	virtual function void build_phase(uvm_phase phase);
+		super.build_phase(phase);
+		trans = transaction::type_id::create("trans",this);		// create an object
+	endfunction: build_phase
+
+
+// run_phase:- task bcz contain delay:- driver drive stimuls to DUT and monitor capture information from DUT based on DUT protocol.
+//	       executes in parallel and all pre-post run phases.
+
+
+	virtual task run_phase(uvm_phase phase);					// inside run phase of producer raise and drop objections
+		phase.raise_objection(phase);
+			for(int i=0; i<5; i++) begin						// repeat(5)
+		
+			`uvm_info(get_type_name(),"Data send",UVM_NONE)
+			 assert(trans.randomize());			
+			 ap.write(trans);								// analysis port then write method (single non blocking function write())
+			 trans.print();									// just calling print method 
+              
+			end												// while in case of blocking we have used put method
+
+		phase.drop_objection(phase);						// write method here and its implementation details is there is subscriber class
+	endtask: run_phase
+
+endclass: producer
+
+
+
+
+// ------------------- target/consumer class  ----------------------
+
+// target1
+
+class target1 extends uvm_component;
+
+
+	`uvm_component_utils(target1)								// factory regestration
+
+	 transaction trans;											// instance for transaction class 
+
+	uvm_analysis_imp #(transaction,target1) aimp;				// subscriber will have analyis imp #(integer) i.e parameter
+																// need two arguments
+
+
+	function new(input string name = "target1", uvm_component parent);	// constructor two arguments
+		super.new(name,parent);
+		aimp = new("READ",this);								// creating an object for recv
+	endfunction: new 
+
+
+	virtual function void write(input transaction t);			// implementation details
+		 t.print();												// just called print method	
+      `uvm_info(get_type_name(),"Data rcvd",UVM_NONE)			// ap has single write method(function)
+	endfunction: write 											
+
+
+endclass: target1
+
+
+
+// ------------------- target/consumer class  ----------------------
+
+// target2
+
+class target2 extends uvm_component;
+
+	 transaction trans;											// instance for transaction class 
+	
+	`uvm_component_utils(target2)								// factory regestration
+
+  	 uvm_analysis_imp #(transaction,target2) aimp;				// subscriber will have analyis imp #(integer) i.e parameter
+																// need two arguments
+
+
+	function new(input string name = "target2" , uvm_component parent);	// constructor two arguments
+		super.new(name,parent);			
+		aimp = new("READ",this);								// creating object for recv
+	endfunction: new 
+
+
+	virtual function void write(input transaction t);			// implementation details	
+		 t.print();												// just calling print method
+		 `uvm_info(get_type_name(),"Data rcvd",UVM_NONE)
+	endfunction: write 
+
+
+endclass: target2
+
+
+// ------------------- env class  ----------------------
+
+class env extends uvm_env;
+
+
+	producer   	 p;												// instances for all i.e producer and subscribers
+	target1 	t1;
+	target2 	t2;
+
+	`uvm_component_utils(env)									// factory regestration
+
+	function new(input string name = "env", uvm_component parent);	// constructor two arguments
+		super.new(name,parent);
+	endfunction: new 
+
+	
+
+// build_phase:- responsible for building all lower level component
+//		 executes in top down manner.
+
+	virtual function void build_phase(uvm_phase phase);
+		super.build_phase(phase);
+		p  = producer::type_id::create("p",this);				// factory's create method
+		t1 = target1::type_id::create("t1",this);	
+		t2 = target2::type_id::create("t2",this);	
+	endfunction: build_phase
+
+
+// connect_phase:- responsible for establising connection between all created component by TLM port-export
+//		   executes in buttom up manner.
+
+
+	virtual function void connect_phase(uvm_phase phase);
+		super.connect_phase(phase);
+		p.ap.connect(t1.aimp);									// connection of produce and subscriber
+		p.ap.connect(t2.aimp);	
+	endfunction: connect_phase
+
+
+endclass: env
+
+
+
+// ------------------- test class  ----------------------
+
+class test extends uvm_test;
+
+
+	 env env_h;														// instance for env class
+				
+	`uvm_component_utils(env)										// factory regestration
+
+	function new(input string name = "env", uvm_component parent);	// constructor two arguments
+		super.new(name,parent);
+	endfunction: new 
+
+	
+// build_phase:- responsible for building all lower level component
+//		 executes in top down manner.
+
+	virtual function void build_phase(uvm_phase phase);
+		super.build_phase(phase);
+		env_h = env::type_id::create("env_h",this);					// factory's create method	
+	endfunction: build_phase
+
+
+// end_of_elaboration_phase:- any final time adjastment in the TB infratecture. 
+//		   	      executes in buttom up manner.
+
+// or printing the topology
+
+	virtual function void end_of_elaboration_phase(uvm_phase phase);
+		super.end_of_elaboration_phase(phase);
+		`uvm_info(get_type_name(), "end_of_elaboration_phase", UVM_NONE)
+		//print();													// in order to print topology
+		uvm_top.print_topology();									// or
+	endfunction: end_of_elaboration_phase
+
+endclass: test
+
+
+
+
+// ------------------- top module ----------------------
+
+module top_module();
+
+	test test_h;										// instance for test class
+
+	initial begin
+
+		test_h = new("TEST",null);						// creating an object for test class using new() method
+		run_test();										// calling run_test method(task)
+	end												   // initiates to executes all the phases starting for build_phase to final_phase
+
+endmodule: top_module
