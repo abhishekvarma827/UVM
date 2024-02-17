@@ -1,6 +1,10 @@
 // WORKING WITH ID like DRV1, DRV2, ENV1. ENV2 (set_report_id_verbosity) 
 // Working with Individual Component like DRV | ENV (set_report_verbosity_level)
 // Working with entire Hierarchy like ENV has DRV & MON (set_report_verbosity_level_hier)
+// Overriding the Severity for ID's | Entire Class 
+//							1.	(set_report_severity_override) entire class
+//							2.  (set_report_severity_id_override) Specific ID 	
+
 `include "uvm_macros.svh"
 import uvm_pkg::*;
 
@@ -34,7 +38,7 @@ class driver extends uvm_driver;
     `uvm_error("DRV2","Executed DRV2 code"); // total error messages = 3
      `uvm_info("DRV2","Executed DRV2 code",UVM_HIGH);
     #10;
-    `uvm_fatal("DRV2","Simulation could not continue");//Code after fatal doesn't work
+    `uvm_fatal("DRV1","Simulation could not continue");//Code after fatal doesn't work
      `uvm_error("DRV2","Executed DRV2 code"); 
      `uvm_error("DRV2","Executed DRV2 code");
   endtask
@@ -50,7 +54,8 @@ module tb;
   //  d.set_report_id_verbosity("DRV1",UVM_HIGH);
   //  e.set_report_id_verbosity("ENV1",UVM_FULL);
     d.set_report_verbosity_level(UVM_HIGH);
- 
+   // d.set_report_severity_override(UVM_FATAL,UVM_INFO); //entire class
+    d.set_report_severity_id_override(UVM_FATAL,"DRV1",UVM_INFO); //entire class
     e.run();
     d.run();
     
