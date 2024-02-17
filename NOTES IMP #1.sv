@@ -34,7 +34,7 @@ class driver extends uvm_driver;
     `uvm_error("DRV2","Executed DRV2 code"); // total error messages = 3
      `uvm_info("DRV2","Executed DRV2 code",UVM_HIGH);
     #10;
-    `uvm_fatal("DRV2","Executed DRV2 code");//Code after fatal doesn't work
+    `uvm_fatal("DRV2","Simulation could not continue");//Code after fatal doesn't work
      `uvm_error("DRV2","Executed DRV2 code"); 
      `uvm_error("DRV2","Executed DRV2 code");
   endtask
