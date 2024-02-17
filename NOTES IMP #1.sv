@@ -9,6 +9,10 @@
 							2. set_report_severity_action(UVM_INFO,UVM_DISPLAY | UVM_EXIT)
  we can exit the simulation based on the errors we are encountering call the die method and exit 
  							1. set_report_max_quit_count(2);
+ To save the console data into a file we have to create a new file log.txt and define a int file. 
+							1. set_report_default_file(file_name) Based on UVM_LOG (Single File)
+                            need to set the set_report_severity_action 
+                            2. set_report_severity_file (file_name) Based on Specific Severity 
 */
 
 `include "uvm_macros.svh"
@@ -54,8 +58,24 @@ endclass
 module tb;
   env e;
   driver d;
+  int file;
   
   initial begin
+    
+    //Working on log file
+    file = $fopen("log.txt","w"); //(file name, mode of file operation) 
+   
+    d.set_report_default_file(file); //For single file based on UVM_LOG enable
+    
+    //d.set_report_severity_file(UVM_ERROR,file); 
+    /*Only storing the UVM_ERROR messages
+    Want to display the data on the console as well as to store the data into a log file 
+    After giving some delay and then use $fclose to close the file */
+    
+    d.set_report_severity_action(UVM_INFO,UVM_DISPLAY | UVM_LOG); 
+    d.set_report_severity_action(UVM_WARNING,UVM_DISPLAY | UVM_LOG);
+    d.set_report_severity_action(UVM_ERROR,UVM_DISPLAY | UVM_LOG);
+    
     e = new("ENV",null);
     d = new("DRV",null);
    //  d.set_report_id_verbosity("DRV1",UVM_HIGH);
@@ -68,15 +88,16 @@ module tb;
     //ACTION CONTROL
       // d.set_report_severity_action(UVM_INFO,UVM_NO_ACTION);
       //d.set_report_severity_action(UVM_INFO,UVM_DISPLAY | UVM_EXIT);
-    d.set_report_severity_action(UVM_FATAL,UVM_DISPLAY);
+  //  d.set_report_severity_action(UVM_FATAL,UVM_DISPLAY);
     
     //To end the simulation based on the number of errors we are encountering
-    d.set_report_max_quit_count(2);
+   // d.set_report_max_quit_count(2);
     
     e.run();
     d.run();
     
 //can set the entire UVM verbosity by writing the + UVM_VERBOSITY = UVM_HIGH (Run Options)
-    
+    #500;
+    $fclose(file);
   end
 endmodule
