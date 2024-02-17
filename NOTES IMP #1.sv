@@ -27,6 +27,16 @@ class driver extends uvm_driver;
   task run();
     `uvm_info("DRV1","Executed DRV1 code",UVM_HIGH);
     `uvm_info("DRV2","Executed DRV2 code",UVM_HIGH);
+    `uvm_error("DRV2","Executed DRV2 code");
+    `uvm_warning("DRV2","Executed DRV2 code");
+    #10;
+     `uvm_error("DRV2","Executed DRV2 code"); 
+    `uvm_error("DRV2","Executed DRV2 code"); // total error messages = 3
+     `uvm_info("DRV2","Executed DRV2 code",UVM_HIGH);
+    #10;
+    `uvm_fatal("DRV2","Executed DRV2 code");//Code after fatal doesn't work
+     `uvm_error("DRV2","Executed DRV2 code"); 
+     `uvm_error("DRV2","Executed DRV2 code");
   endtask
 endclass
 
@@ -40,6 +50,7 @@ module tb;
   //  d.set_report_id_verbosity("DRV1",UVM_HIGH);
   //  e.set_report_id_verbosity("ENV1",UVM_FULL);
     d.set_report_verbosity_level(UVM_HIGH);
+ 
     e.run();
     d.run();
     
