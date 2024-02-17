@@ -18,7 +18,7 @@ class obj extends uvm_object;
   rand bit [7:0]b;
   /*If register a class but not registers a variable to a factory and tries to print the value using print then won't be getting an 
       error but can not see the size  as well as variable name present in a class*/
-  `uvm_object_utils_begin(obj)
+  `uvm_object_utils_begin(obj)   //uvm_field_object | uvm_field_enum | uvm_field_string | uvm_field_real
   `uvm_field_int(a,UVM_DEFAULT | UVM_BIN); // UVM_ALL_ON | UVM_NOCOPY | UVM_NOPRINT | UVM_NOPACK | UVM_PHYSICAL | UVM_REFERENCE
   `uvm_field_int(b,UVM_DEFAULT | UVM_DEC); //UVM_BIN | UVM_DEC | UVM_UNSINGED | UVM_OCT | UVM_HEX | UVM_STRING | UVM_TIME
   `uvm_object_utils_end
