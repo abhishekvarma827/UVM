@@ -1,4 +1,4 @@
-  // Copy & Clone Methods
+  // Copy & Clone Methods | Deep & Shallow Copy | Compare
 `include "uvm_macros.svh";
 import uvm_pkg::*;
 
