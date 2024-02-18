@@ -18,6 +18,8 @@ endclass
 module tb;
   object f;
   object s;
+  int status =0;
+  
   /*
   initial begin
   
@@ -29,19 +31,38 @@ module tb;
     s.print();
   end*/
   
+ /* 
+ 
   initial begin
     object f,s;
     f = new("first");
     //s = f.clone();  
+    
     /*Incompatible types at assignment 
 	When use assignment operator "=" sign so parent class handle is (uvm_object) type and child     handle is off first type   
-	Here s is the child type it is of (first) type and when we use assignment operator and         clone method  (f.(clone)) it will return the handle of parent class and it is of uvm_object 	   type but here s is of (first) type a derived class therefore we are getting an                 incompatibility type error so using the $cast.*/ 
-    $cast(s,f.clone());
+	Here s is the child type it is of (first) type and when we use assignment operator and         clone method  (f.(clone)) it will return the handle of parent class and it is of uvm_object 	   type but here s is of (first) type a derived class therefore we are getting an                 incompatibility type error so using the $cast.*/
+    
+  /*
+  	$cast(s,f.clone());
     f.print();
     s.print();
   end
-endmodule
+endmodule */
 
+
+//Compare 
+  initial begin
+  f = new ("f");
+  s = new("s");
+  f.randomize();
+  s.copy(f);
+  f.print();
+  s.print();
+     
+    status = f.compare(s);
+  $display("Value of status : %0d", status);
+  end
+endmodule
 
 /*              //Shallow VS Deep
 
@@ -135,5 +156,4 @@ second s1, s2; ///shallow
   
 endmodule
 
-*/
 */
